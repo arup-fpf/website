@@ -1,0 +1,91 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contact — Form + Function</title>
+<meta name="description" content="Get in touch with Studio Form + Function.">
+<meta name="theme-color" content="#C8262C">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;700;900&family=Raleway:wght@300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/facade.css">
+</head><body>
+<div id="cursor-dot"></div><div id="cursor-ring"></div>
+<a href="index.html" class="brand-fixed" aria-label="Home"><svg viewBox="0 0 800 800" aria-hidden="true"><g>
+<rect x="101.59" y="244.83" width="358.51" height="358.51" stroke-width="3"/>
+<rect x="244.83" y="101.59" width="358.51" height="358.51" stroke-width="3"/>
+<rect x="196.65" y="339.9" width="358.51" height="358.51" stroke-width="3"/>
+<rect x="339.9" y="196.65" width="358.51" height="358.51" stroke-width="3"/>
+<rect x="339.9" y="244.83" width="120.2" height="310.33" stroke-width="11"/>
+<rect x="244.83" y="339.9" width="310.33" height="120.2" stroke-width="11"/>
+<polyline points="293.02 101.59 244.83 101.59 244.83 339.9 196.65 339.9" stroke-width="18"/>
+<polyline points="506.98 698.41 555.17 698.41 555.17 460.1 603.35 460.1" stroke-width="18"/>
+</g></svg><div><div class="bt">Form + Function</div><span class="bs">Architecture Design Studio</span></div></a>
+<div class="page-content"><main>
+<div class="eyebrow reveal">Get in touch</div>
+<h1 class="page-title reveal">Let's design<br><span class="white">something together.</span></h1>
+<p class="lead reveal">Tell us about your project — residential, hospitality, interior, or planning.</p>
+<section class="contact-grid reveal" style="margin-top:clamp(3rem,6vw,4rem);">
+  <form name="contact" method="POST" data-netlify="true" netlify-honeypot="bot-field" onsubmit="return handleContact(event)">
+    <input type="hidden" name="form-name" value="contact">
+    <p style="display:none"><label>Skip: <input name="bot-field"></label></p>
+    <div class="f2">
+      <div class="field"><input type="text" name="name" id="c-name" placeholder=" " required><label for="c-name">Your name</label></div>
+      <div class="field"><input type="email" name="email" id="c-email" placeholder=" " required><label for="c-email">Email address</label></div>
+    </div>
+    <div class="f2">
+      <div class="field"><input type="text" name="project-type" id="c-type" placeholder=" "><label for="c-type">Project type</label></div>
+      <div class="field"><input type="text" name="location" id="c-loc" placeholder=" "><label for="c-loc">Location / City</label></div>
+    </div>
+    <div class="field"><textarea name="message" id="c-msg" placeholder=" " rows="5" required></textarea><label for="c-msg">Tell us about your project</label></div>
+    <button type="submit" class="send-btn">Send message →</button>
+    <div id="c-toast" class="toast">Message sent ✓ &nbsp;We'll be in touch shortly.</div>
+  </form>
+  <aside>
+    <h4 class="ci-h">Studio</h4><p>C-7, 232, Hauz Khas<br>New Delhi — 110016<br>India</p>
+    <h4 class="ci-h">Email</h4><p><a href="mailto:contact@studiofpf.in" class="ul">contact@studiofpf.in</a></p>
+    <h4 class="ci-h">Phone</h4><p><a href="tel:+918882610788" class="ul">+91 88826 10788</a></p>
+    <h4 class="ci-h">Hours</h4><p>Mon – Sat · 10:00 – 19:00</p>
+  </aside>
+</section>
+<style>
+.contact-grid{ display:grid; grid-template-columns:1.5fr 1fr; gap:clamp(2.5rem,6vw,5rem); }
+.f2{ display:grid; grid-template-columns:1fr 1fr; gap:1.4rem; }
+.field{ position:relative; margin-bottom:1.5rem; }
+.field input,.field textarea{ width:100%; background:transparent; border:none; border-bottom:1px solid rgba(10,10,10,.3); padding:.7rem 0; font-family:var(--rale); font-size:1rem; color:var(--black); resize:vertical; }
+.field input:focus,.field textarea:focus{ outline:none; border-color:var(--black); }
+.field label{ position:absolute; left:0; top:.7rem; color:rgba(10,10,10,.55); pointer-events:none; transition:.2s; }
+.field input:focus+label,.field input:not(:placeholder-shown)+label,.field textarea:focus+label,.field textarea:not(:placeholder-shown)+label{ top:-.7rem; font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; color:var(--black); opacity:.7; }
+.send-btn{ font-family:var(--mont); font-weight:500; font-size:13px; letter-spacing:.1em; text-transform:uppercase; background:var(--black); color:var(--cream); border:none; padding:1rem 2rem; cursor:pointer; transition:background .25s,color .25s; margin-top:.5rem; }
+.send-btn:hover{ background:var(--cream); color:var(--black); }
+.toast{ margin-top:1.2rem; font-family:var(--mont); font-size:13px; color:var(--cream); opacity:0; transition:opacity .3s; }
+.toast.show{ opacity:1; }
+aside .ci-h{ font-family:var(--mont); font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--black); opacity:.7; margin:1.4rem 0 .5rem; }
+aside .ci-h:first-child{ margin-top:0; }
+.ul{ border-bottom:1px solid rgba(10,10,10,.3); text-decoration:none; } .ul:hover{ color:var(--cream); border-color:var(--cream); }
+@media(max-width:760px){ .contact-grid{ grid-template-columns:1fr; } .f2{ grid-template-columns:1fr; } }
+</style>
+<script>
+function handleContact(e){ e.preventDefault(); const f=e.target,t=document.getElementById('c-toast');
+  const d=new URLSearchParams(new FormData(f)).toString();
+  fetch('/',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:d})
+   .then(()=>{ t.classList.add('show'); f.reset(); }).catch(()=>{ t.textContent='Something went wrong — email contact@studiofpf.in'; t.classList.add('show'); });
+  return false; }
+</script>
+</main></div><nav id="bottom-nav">
+  <div class="bar-row">
+    <div class="bar-label"><span>Studio Form + Function — Hauz Khas, New Delhi</span><span class="bar-sub">Architecture | Interior | Planning | Est. 2021</span></div>
+    <div class="bar-links"><a href="about.html">About</a><a href="studio.html">Studio</a><a href="work.html">Work</a><a href="contact.html" class="active">Contact Us</a></div>
+  </div>
+  <div class="panel">
+    <a class="nav-topbar" id="navTopbar" href="index.html" aria-label="Back to home"><svg viewBox="0 0 800 800" aria-hidden="true"><g>
+<rect x="101.59" y="244.83" width="358.51" height="358.51" stroke-width="3"/>
+<rect x="244.83" y="101.59" width="358.51" height="358.51" stroke-width="3"/>
+<rect x="196.65" y="339.9" width="358.51" height="358.51" stroke-width="3"/>
+<rect x="339.9" y="196.65" width="358.51" height="358.51" stroke-width="3"/>
+<rect x="339.9" y="244.83" width="120.2" height="310.33" stroke-width="11"/>
+<rect x="244.83" y="339.9" width="310.33" height="120.2" stroke-width="11"/>
+<polyline points="293.02 101.59 244.83 101.59 244.83 339.9 196.65 339.9" stroke-width="18"/>
+<polyline points="506.98 698.41 555.17 698.41 555.17 460.1 603.35 460.1" stroke-width="18"/>
+</g></svg><div><div class="bt">Form + Function</div><span class="bs">Back to facade</span></div></a>
+    <div class="panel-links"><a href="about.html">About</a><a href="studio.html">Studio</a><a href="work.html">Work</a><a href="contact.html" class="active">Contact Us</a></div>
+    <div class="meta">C-7, 232, Hauz Khas, New Delhi — 110016<br><a href="mailto:contact@studiofpf.in">contact@studiofpf.in</a> · +91 88826 10788</div>
+  </div>
+</nav><script src="assets/facade.js"></script></body></html>

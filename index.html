@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Form + Function — Architecture Design Studio</title>
+<meta name="description" content="Studio Form + Function — Architecture, Interior & Planning. Where form meets its purpose. Hauz Khas, New Delhi.">
+<meta name="theme-color" content="#C8262C">
+<link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@200;300;400;500;700;900&family=Raleway:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{ margin:0; padding:0; box-sizing:border-box; }
+:root{
+  --wall:#C8262C; --wall-dark:#A81F24;
+  --black:#0A0A0A; --cream:#F5F2ED;
+  --frame:#FBFAF7; --shutter:#E4DDD0; --shutter-line:#cfc6b5;
+  --terra:#C4875A;
+  --mont:'Montserrat',sans-serif; --rale:'Raleway',sans-serif;
+}
+html,body{ height:100%; }
+html{ background:var(--wall); }
+body{ font-family:var(--rale); color:var(--black); background:var(--wall); overflow-x:hidden;
+  cursor:none; }
+
+/* ─────────────── CUSTOM CURSOR (exact colors) ─────────────── */
+#cursor-dot,#cursor-ring{ position:fixed; top:0; left:0; z-index:9999; pointer-events:none;
+  border-radius:50%; transform:translate(-50%,-50%); }
+#cursor-dot{ width:7px; height:7px; background:var(--black); transition:width .2s, height .2s, background .25s; }
+#cursor-ring{ width:34px; height:34px; border:1px solid var(--black);
+  transition:width .25s,height .25s,opacity .25s,border-color .25s; }
+/* on black backgrounds → red cursor */
+body.cur-on-dark #cursor-dot{ background:var(--wall); }
+body.cur-on-dark #cursor-ring{ border-color:var(--wall); }
+body.cur-hover #cursor-ring{ width:54px; height:54px; }
+body.cur-hover #cursor-dot{ width:4px; height:4px; }
+@media (pointer:coarse){ #cursor-dot,#cursor-ring{ display:none; } body{ cursor:auto; } }
+
+/* ─────────────── LOADER (red bg, black logo) ─────────────── */
+#loader{ position:fixed; inset:0; background:var(--wall); z-index:10000;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2.4rem; }
+#loader-logo{ width:clamp(120px,22vw,180px); aspect-ratio:1; overflow:visible; }
+#loader-logo g{ stroke:var(--black); fill:none; stroke-miterlimit:10; }
+#loader-logo .lp{ opacity:0; transform:translateY(-380px); transform-box:fill-box; transform-origin:center;
+  animation:lpDrop .55s cubic-bezier(.34,1.5,.6,1) forwards; animation-delay:var(--d,0s); }
+@keyframes lpDrop{ 0%{opacity:0;transform:translateY(-380px);} 65%{opacity:1;}
+  80%{transform:translateY(10px);} 92%{transform:translateY(-3px);} 100%{opacity:1;transform:translateY(0);} }
+#loader-slider{ width:130px; height:1px; background:rgba(10,10,10,.18); overflow:hidden; opacity:0;
+  animation:fadeIn .3s 1.0s forwards; }
+#loader-slider .fill{ height:100%; width:0; background:var(--black);
+  animation:fill 1.0s 1.05s cubic-bezier(.4,0,.2,1) forwards; }
+@keyframes fill{ to{ width:100%; } }
+@keyframes fadeIn{ to{ opacity:1; } }
+@media (prefers-reduced-motion:reduce){ #loader-logo .lp{ animation:fadeIn .4s forwards; transform:none; } }
+
+/* ─────────────── FACADE (single page) ─────────────── */
+.facade-scroll{ position:relative; height:760vh; background:var(--wall); }
+.facade-pin{ position:sticky; top:0; height:100vh; overflow:hidden;
+  background:
+    radial-gradient(circle at 28% 18%, rgba(255,255,255,.04), transparent 60%),
+    radial-gradient(circle at 72% 82%, rgba(0,0,0,.08), transparent 55%),
+    var(--wall); }
+.facade-pin::before{ content:""; position:absolute; inset:0; pointer-events:none; opacity:.35;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); mix-blend-mode:overlay; }
+
+/* brand mark top-left */
+.facade-brand{ position:absolute; top:34px; left:clamp(1.5rem,5vw,5rem); z-index:7; display:flex; align-items:center; gap:14px; }
+.facade-brand svg{ width:46px; height:46px; }
+.facade-brand svg g{ stroke:var(--black); fill:none; stroke-miterlimit:10; }
+.facade-brand .bt{ font-family:var(--mont); font-weight:700; font-size:14px; letter-spacing:.05em; color:var(--black); }
+.facade-brand .bs{ display:block; font-weight:300; font-size:9.5px; letter-spacing:.14em; text-transform:uppercase; color:rgba(10,10,10,.65); margin-top:2px; }
+
+/* LEFT text (dissolves on scroll) — confined to left zone, never overlaps windows */
+.facade-text{ position:absolute; top:50%; left:clamp(1.5rem,5vw,5rem); transform:translateY(-50%);
+  z-index:6; width:min(40vw, 540px); pointer-events:none; will-change:opacity, filter; }
+.facade-logo{ display:block; width:clamp(240px, 34vw, 430px); height:auto; margin:0 0 1.6rem; }
+.facade-eyebrow{ font-family:var(--mont); font-weight:400; font-size:clamp(9px,1.3vw,13px);
+  letter-spacing:.18em; text-transform:uppercase; color:var(--black); margin-bottom:1.3rem; opacity:.85; white-space:nowrap; }
+.facade-h1{ font-family:var(--mont); font-weight:900; line-height:.95; letter-spacing:-.02em;
+  font-size:clamp(2.4rem,6vw,5.8rem); text-transform:uppercase; color:var(--black); }
+.facade-h1 .white{ color:var(--cream); }
+/* awards strip below headline */
+.facade-awards{ margin-top:1.8rem; max-width:480px; }
+.facade-awards .aw-label{ display:inline-block; font-family:var(--mont); font-weight:500; font-size:10px;
+  letter-spacing:.22em; text-transform:uppercase; color:var(--cream); margin-bottom:.7rem;
+  padding-bottom:.35rem; border-bottom:1.5px solid rgba(10,10,10,.35); }
+.facade-awards .aw-item{ font-family:var(--mont); font-weight:300; font-size:clamp(11px,1.25vw,14px);
+  letter-spacing:.01em; color:var(--black); line-height:1.5; margin-top:.25rem; }
+.facade-awards .aw-item strong{ font-weight:700; }
+
+/* RIGHT track of columns (3 windows each), bigger + more gap */
+.facade-track{ position:absolute; top:0; left:50%; right:0; height:100%;
+  display:flex; align-items:center; gap:clamp(90px,11vw,200px);
+  padding:0 6vw 0 2vw; will-change:transform; }
+.win-col{ flex:0 0 auto; display:flex; flex-direction:column; gap:clamp(40px,6vh,80px);
+  will-change:opacity; position:relative; z-index:2; }
+
+
+/* WINDOW (bigger, 2 per column) */
+.window{ position:relative; flex:0 0 auto; width:clamp(200px,19vw,300px); aspect-ratio:3/3.4;
+  text-decoration:none; display:block; }
+.win-shadow{ position:absolute; inset:6% -4% -6% 6%; background:rgba(0,0,0,.18); filter:blur(8px); z-index:0; }
+.win-opening{ position:absolute; inset:11% 14%; background:#26211c; overflow:hidden; z-index:1;
+  box-shadow: inset 0 0 18px rgba(0,0,0,.6); }
+.win-glass{ position:absolute; inset:0; display:flex;
+  background:linear-gradient(135deg, rgba(255,255,255,.22), rgba(180,200,210,.12) 40%, rgba(120,140,150,.18)); }
+.win-glass .pane{ flex:1; border:3px solid var(--frame); }
+.win-curtain{ position:absolute; inset:0; opacity:.5;
+  background:repeating-linear-gradient(90deg, rgba(245,242,237,.55) 0 6px, rgba(225,220,210,.4) 6px 12px); }
+.win-mullion-v{ position:absolute; top:0; bottom:0; left:50%; width:3px; background:var(--frame); transform:translateX(-50%); }
+.win-mullion-h{ position:absolute; left:0; right:0; top:50%; height:3px; background:var(--frame); transform:translateY(-50%); }
+.win-project{ position:absolute; inset:0; background-size:cover; background-position:center;
+  opacity:0; transition:opacity .6s ease .15s; z-index:2; }
+.window:hover .win-project{ opacity:1; }
+.win-caption{ position:absolute; left:0; right:0; bottom:0; z-index:3;
+  background:linear-gradient(transparent, rgba(0,0,0,.82)); color:var(--cream);
+  padding:34px 14px 14px; opacity:0; transform:translateY(8px);
+  transition:opacity .4s ease .35s, transform .4s ease .35s; }
+.window:hover .win-caption{ opacity:1; transform:none; }
+.win-caption .t{ font-family:var(--mont); font-weight:700; font-size:14px; }
+.win-caption .l{ font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:var(--terra); margin-top:3px; }
+.win-frame{ position:absolute; inset:9% 12%; border:5px solid var(--frame); z-index:4; pointer-events:none; }
+.shutter{ position:absolute; top:9%; bottom:9%; width:14%; z-index:5;
+  background:repeating-linear-gradient(0deg, var(--shutter) 0 5px, var(--shutter-line) 5px 6px);
+  border:2px solid var(--frame);
+  transition:transform .9s cubic-bezier(.5,0,.2,1); backface-visibility:hidden; }
+.shutter.left{ left:0; transform-origin:left center; transform:perspective(800px) rotateY(0); }
+.shutter.right{ right:0; transform-origin:right center; transform:perspective(800px) rotateY(0); }
+.window:hover .shutter.left{ transform:perspective(800px) rotateY(108deg); }
+.window:hover .shutter.right{ transform:perspective(800px) rotateY(-108deg); }
+.shutter::after{ content:""; position:absolute; top:50%; width:5px; height:16px; background:var(--frame);
+  border-radius:2px; transform:translateY(-50%); }
+.shutter.left::after{ right:3px; } .shutter.right::after{ left:3px; }
+
+/* progress + hint */
+.scroll-hint{ position:absolute; bottom:90px; left:clamp(1.5rem,5vw,5rem); z-index:6;
+  font-family:var(--mont); font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--black);
+  opacity:.7; display:flex; align-items:center; gap:10px; will-change:opacity; }
+.scroll-hint .bar{ width:46px; height:1px; background:var(--black); position:relative; overflow:hidden; }
+.scroll-hint .bar::after{ content:""; position:absolute; inset:0; width:40%; background:var(--black);
+  animation:slide 1.8s ease-in-out infinite; }
+@keyframes slide{ 0%{left:-40%;} 100%{left:100%;} }
+
+/* ─────────────── BOTTOM NAV (rises to fullscreen on hover) ─────────────── */
+#bottom-nav{ position:fixed; left:0; right:0; bottom:0; z-index:8000; height:58px;
+  background:var(--black); color:var(--cream); overflow:hidden;
+  transition:height .55s cubic-bezier(.6,0,.2,1); }
+#bottom-nav .bar-row{ height:58px; display:flex; align-items:center; justify-content:space-between;
+  padding:0 clamp(1.5rem,5vw,5rem); }
+#bottom-nav .bar-label{ font-family:var(--mont); font-weight:300; font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:rgba(245,242,237,.6); display:flex; flex-direction:column; gap:3px; }
+#bottom-nav .bar-label .bar-sub{ font-size:9.5px; letter-spacing:.18em; color:rgba(245,242,237,.4); }
+#bottom-nav .bar-links{ display:flex; gap:clamp(1.5rem,4vw,3.5rem); }
+#bottom-nav .bar-links a{ font-family:var(--mont); font-weight:300; font-size:12px; letter-spacing:.14em;
+  text-transform:uppercase; color:var(--cream); text-decoration:none; transition:color .2s; }
+#bottom-nav .bar-links a:hover{ color:var(--wall); }
+/* expanded panel */
+#bottom-nav .panel{ position:absolute; inset:0; display:flex; flex-direction:column;
+  opacity:0; pointer-events:none; transition:opacity .4s ease .1s; }
+#bottom-nav.open .panel{ pointer-events:auto; }
+/* red top bar (return to facade) — equal height to the bottom bar */
+#bottom-nav .nav-topbar{ height:58px; flex:0 0 58px; background:var(--wall); display:flex; align-items:center;
+  gap:13px; padding:0 clamp(1.5rem,5vw,5rem); text-decoration:none; cursor:pointer; }
+#bottom-nav .nav-topbar svg{ width:34px; height:34px; }
+#bottom-nav .nav-topbar svg g{ stroke:var(--black); fill:none; stroke-miterlimit:10; }
+#bottom-nav .nav-topbar .bt{ font-family:var(--mont); font-weight:700; font-size:13px; letter-spacing:.05em; color:var(--black); }
+#bottom-nav .nav-topbar .bs{ display:block; font-weight:300; font-size:9px; letter-spacing:.14em; text-transform:uppercase; color:rgba(10,10,10,.7); margin-top:2px; }
+/* nav links centered between the bars */
+#bottom-nav .panel-links{ flex:1; display:flex; flex-direction:column; align-items:flex-start; justify-content:center;
+  gap:.3rem; padding:0 clamp(1.5rem,8vw,8rem); }
+#bottom-nav .panel-links a{ font-family:var(--mont); font-weight:700; font-size:clamp(2rem,7vw,5rem);
+  letter-spacing:-.01em; text-transform:uppercase; color:var(--cream); text-decoration:none; line-height:1.05;
+  transition:color .2s, transform .3s; }
+#bottom-nav .panel-links a:hover{ color:var(--wall); transform:translateX(14px); }
+#bottom-nav .panel .meta{ position:absolute; bottom:30px; right:clamp(1.5rem,8vw,8rem); text-align:right;
+  font-family:var(--rale); font-weight:300; font-size:13px; color:rgba(245,242,237,.7); line-height:1.7; }
+#bottom-nav .panel .meta a{ font-size:13px; font-weight:300; color:rgba(245,242,237,.7); }
+#bottom-nav .panel .meta a:hover{ color:var(--wall); }
+/* hover / focus-within expands it */
+#bottom-nav.open{ height:100vh; }
+#bottom-nav.open .panel{ opacity:1; }
+#bottom-nav.open .bar-row{ opacity:0; pointer-events:none; }
+#bottom-nav .bar-row{ cursor:pointer; }
+
+@media(max-width:900px){
+  /* TABLET / PHONE — rotate the interaction: windows scroll VERTICALLY */
+  .facade-pin{ overflow:visible; }
+  .facade-text{ width:88%; left:6vw; top:7vh; transform:none; z-index:6; }
+  .facade-logo{ width:clamp(200px, 62vw, 320px); }
+  .facade-awards{ max-width:88%; }
+  /* track starts right below the text block (tight gap) */
+  .facade-track{ position:absolute; left:0; right:0; width:100%; height:auto; top:52vh; bottom:auto;
+    flex-direction:column; align-items:center; gap:clamp(30px,5vh,56px);
+    padding:0 0 16vh; }
+  .win-col{ flex-direction:row; justify-content:center; gap:clamp(20px,5vw,46px); }
+  /* windows at ~70% of previous size */
+  .window{ width:clamp(105px,27vw,160px); }
+  /* scroll hint lifted clear of the 58px nav bar */
+  .scroll-hint{ bottom:78px; }
+  #bottom-nav .bar-links{ gap:1.1rem; }
+  #bottom-nav .bar-links a{ font-size:9px; }
+  #bottom-nav .bar-label{ font-size:8px; }
+  #bottom-nav .bar-label .bar-sub{ display:none; }
+}
+@media(max-width:520px){
+  .win-col{ flex-direction:column; }   /* 1-wide stack on small phones */
+  .window{ width:min(72vw,300px); }
+}
+</style>
+</head>
+<body>
+
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
+<!-- Loader: red bg, black logo -->
+<div id="loader">
+  <svg id="loader-logo" viewBox="0 0 800 800" xmlns="http://www.w3.org/2000/svg" aria-label="Form + Function">
+    <g>
+      <rect class="lp" style="--d:0s"    x="101.59" y="244.83" width="358.51" height="358.51" stroke-width="6"/>
+      <rect class="lp" style="--d:.1s"   x="244.83" y="101.59" width="358.51" height="358.51" stroke-width="6"/>
+      <rect class="lp" style="--d:.2s"   x="196.65" y="339.9"  width="358.51" height="358.51" stroke-width="6"/>
+      <rect class="lp" style="--d:.3s"   x="339.9"  y="196.65" width="358.51" height="358.51" stroke-width="6"/>
+      <rect class="lp" style="--d:.42s"  x="339.9"  y="244.83" width="120.2"  height="310.33" stroke-width="14"/>
+      <rect class="lp" style="--d:.52s"  x="244.83" y="339.9"  width="310.33" height="120.2"  stroke-width="14"/>
+      <polyline class="lp" style="--d:.64s" points="293.02 101.59 244.83 101.59 244.83 339.9 196.65 339.9" stroke-width="22"/>
+      <polyline class="lp" style="--d:.74s" points="506.98 698.41 555.17 698.41 555.17 460.1 603.35 460.1" stroke-width="22"/>
+    </g>
+  </svg>
+  <div id="loader-slider"><div class="fill"></div></div>
+</div>
+
+<section class="facade-scroll" id="facadeScroll">
+  <div class="facade-pin">
+
+    <div class="facade-text" id="facadeText">
+      <svg class="facade-logo" id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1834.76 497.17">
+  <defs>
+    <style>
+      .cls-1 {
+        font-family: Montserrat-Light, Montserrat;
+        font-size: 94px;
+        font-variation-settings: 'wght' 300;
+        font-weight: 300;
+      }
+
+      .cls-2 {
+        letter-spacing: 0em;
+      }
+
+      .cls-3 {
+        font-family: Montserrat-SemiBold, Montserrat;
+        font-size: 150px;
+        font-variation-settings: 'wght' 600;
+        font-weight: 600;
+      }
+
+      .cls-4 {
+        stroke-width: 1.08px;
+      }
+
+      .cls-4, .cls-5, .cls-6, .cls-7 {
+        fill: none;
+        stroke: #F5F2ED;
+        stroke-miterlimit: 10;
+      }
+
+      .cls-8 {
+        letter-spacing: 0em;
+      }
+
+      .cls-9 {
+        letter-spacing: 0em;
+      }
+
+      .cls-5 {
+        stroke-width: 2px;
+      }
+
+      .cls-6 {
+        stroke-width: 7.56px;
+      }
+
+      .cls-7 {
+        stroke-width: 4.32px;
+      }
+
+      .cls-10 {
+        letter-spacing: -.01em;
+      }
+
+      .cls-11 {
+        letter-spacing: -.02em;
+      }
+
+      .cls-12 {
+        letter-spacing: -.01em;
+      }
+
+      .cls-13 {
+        letter-spacing: -.01em;
+      }
+
+      .cls-14 {
+        letter-spacing: -.01em;
+      }
+
+      .cls-15 {
+        letter-spacing: 0em;
+      }
+
+      .cls-16 {
+        letter-spacing: 0em;
+      }
+
+      .cls-17 {
+        letter-spacing: 0em;
+      }
+
+      .cls-18 {
+        letter-spacing: 0em;
+      }
+          text{ fill:#F5F2ED; }
+    </style>
+  </defs>
+  <g>
+    <g>
+      <rect class="cls-4" x=".54" y="154.98" width="216.28" height="216.28"/>
+      <rect class="cls-4" x="86.96" y="68.56" width="216.28" height="216.28"/>
+      <rect class="cls-4" x="57.89" y="212.33" width="216.28" height="216.28"/>
+      <rect class="cls-4" x="144.31" y="125.91" width="216.28" height="216.28"/>
+    </g>
+    <rect class="cls-7" x="144.31" y="154.98" width="72.52" height="187.22"/>
+    <rect class="cls-7" x="86.96" y="212.33" width="187.22" height="72.52"/>
+    <polyline class="cls-6" points="116.03 68.56 86.96 68.56 86.96 212.33 57.89 212.33"/>
+    <polyline class="cls-6" points="245.11 428.61 274.18 428.61 274.18 284.84 303.24 284.84"/>
+  </g>
+  <line class="cls-5" x1="466" x2="466" y2="497.17"/>
+  <g>
+    <text class="cls-3" transform="translate(560.23 246.09)"><tspan class="cls-10" x="0" y="0">F</tspan><tspan class="cls-9" x="93.3" y="0">o</tspan><tspan class="cls-15" x="190.05" y="0">r</tspan><tspan x="252.3" y="0">m + </tspan><tspan class="cls-10" x="581.54" y="0">F</tspan><tspan x="674.84" y="0">u</tspan><tspan class="cls-2" x="776.99" y="0">n</tspan><tspan class="cls-18" x="879.89" y="0">c</tspan><tspan x="968.09" y="0">tion</tspan></text>
+    <text class="cls-1" transform="translate(560.23 354.23)"><tspan x="0" y="0">A</tspan><tspan class="cls-14" x="66.27" y="0">r</tspan><tspan class="cls-16" x="101.99" y="0">c</tspan><tspan x="153.31" y="0">h</tspan><tspan class="cls-12" x="216.57" y="0">i</tspan><tspan class="cls-11" x="239.89" y="0">t</tspan><tspan x="275.51" y="0">e</tspan><tspan class="cls-17" x="331.63" y="0">c</tspan><tspan x="384.36" y="0">tu</tspan><tspan class="cls-13" x="484.66" y="0">r</tspan><tspan class="cls-8" x="520.38" y="0">e Design Studio</tspan></text>
+  </g>
+</svg>
+      <h1 class="facade-h1">Where form<br>meets its<br><span class="white">purpose.</span></h1>
+      <div class="facade-awards">
+        <span class="aw-label">Recognition</span>
+        <div class="aw-item"><strong>FOAID Delhi</strong> — Winner, ICA Creative Minds Next Architecture Design</div>
+        <div class="aw-item"><strong>FOAID Mumbai</strong> — Winner, ICA Creative Minds Next Architecture Interior Design</div>
+        <div class="aw-item"><strong>Buildner</strong> — House of Future, Top 10 Honourable Mention</div>
+        <div class="aw-item"><strong>Volume Zero</strong> — Tree House Competition 2021, Top 10 Honourable Mention</div>
+      </div>
+    </div>
+
+    <div class="facade-track" id="facadeTrack"></div>
+
+    <div class="scroll-hint" id="scrollHint"><span class="bar"></span> Scroll to explore our work</div>
+  </div>
+</section>
+
+<!-- Bottom nav -->
+<nav id="bottom-nav">
+  <div class="bar-row">
+    <div class="bar-label">
+      <span>Studio Form + Function — Hauz Khas, New Delhi</span>
+      <span class="bar-sub">Architecture | Interior | Planning | Est. 2021</span>
+    </div>
+    <div class="bar-links">
+      <a href="about.html" data-nav>About</a>
+      <a href="studio.html" data-nav>Studio</a>
+      <a href="work.html" data-nav>Work</a>
+      <a href="contact.html" data-nav>Contact Us</a>
+    </div>
+  </div>
+  <div class="panel">
+    <a class="nav-topbar" id="navTopbar" role="button" tabindex="0" aria-label="Back to home">
+      <svg viewBox="0 0 800 800" aria-hidden="true"><g>
+        <rect x="101.59" y="244.83" width="358.51" height="358.51" stroke-width="3"/>
+        <rect x="244.83" y="101.59" width="358.51" height="358.51" stroke-width="3"/>
+        <rect x="196.65" y="339.9"  width="358.51" height="358.51" stroke-width="3"/>
+        <rect x="339.9"  y="196.65" width="358.51" height="358.51" stroke-width="3"/>
+        <rect x="339.9"  y="244.83" width="120.2"  height="310.33" stroke-width="11"/>
+        <rect x="244.83" y="339.9"  width="310.33" height="120.2"  stroke-width="11"/>
+        <polyline points="293.02 101.59 244.83 101.59 244.83 339.9 196.65 339.9" stroke-width="18"/>
+        <polyline points="506.98 698.41 555.17 698.41 555.17 460.1 603.35 460.1" stroke-width="18"/>
+      </g></svg>
+      <div><div class="bt">Form + Function</div><span class="bs">Back to facade</span></div>
+    </a>
+    <div class="panel-links">
+      <a href="about.html" data-nav>About</a>
+      <a href="studio.html" data-nav>Studio</a>
+      <a href="work.html" data-nav>Work</a>
+      <a href="contact.html" data-nav>Contact Us</a>
+    </div>
+    <div class="meta">
+      C-7, 232, Hauz Khas, New Delhi — 110016<br>
+      <a href="mailto:contact@studiofpf.in">contact@studiofpf.in</a> · +91 88826 10788
+    </div>
+  </div>
+</nav>
+
+<script>
+/* ── projects → clickable windows in columns of 3 ── */
+const projects = [
+  { t:"House of Future", l:"Dubai · Competition", img:"url('assets/projects/house-of-future/1.jpg')", url:"projects/house-of-future.html" },
+  { t:"Tawang", l:"Tawang · Hospitality", img:"url('assets/projects/tawang/1.jpg')", url:"projects/tawang.html" },
+  { t:"Daily Cha Café", l:"Café · Interior", img:"linear-gradient(135deg,#caa472,#8a6d3b)", url:"projects/daily-cha-cafe.html" },
+  { t:"Concrete & Grain", l:"Café · Interior", img:"url('assets/projects/concrete-and-grain/1.jpg')", url:"projects/concrete-and-grain.html" },
+  { t:"Aroma & Ambience", l:"Café · Interior", img:"url('assets/projects/aroma-and-ambience/1.jpg')", url:"projects/aroma-and-ambience.html" },
+  { t:"Jodi", l:"Retail · Interior", img:"url('assets/projects/jodi/1.jpg')", url:"projects/jodi.html" },
+  { t:"The Mirage", l:"Dubai · Hospitality", img:"url('assets/projects/the-mirage/1.jpg')", url:"projects/the-mirage.html" },
+  { t:"DLF Phase 2", l:"Gurugram · Residential", img:"url('assets/projects/dlf-phase-2/1.jpg')", url:"projects/dlf-phase-2.html" },
+  { t:"University Entrance Block", l:"Institutional", img:"url('assets/projects/university-entrance-block/1.jpg')", url:"projects/university-entrance-block.html" },
+  { t:"Retrofit Office, Sonipat", l:"Sonipat · Workplace", img:"url('assets/projects/retrofit-office-sonipat/1.jpg')", url:"projects/retrofit-office-sonipat.html" },
+  { t:"Garment Factory", l:"Industrial", img:"url('assets/projects/garment-factory/1.jpg')", url:"projects/garment-factory.html" },
+  { t:"Sector 48", l:"Gurugram · Residential", img:"url('assets/projects/sector-48/1.jpg')", url:"projects/sector-48.html" },
+  { t:"Kaira Looro", l:"Senegal · Competition", img:"url('assets/projects/kaira-looro/1.jpg')", url:"projects/kaira-looro.html" },
+];
+const track=document.getElementById('facadeTrack');
+function makeWindow(p){
+  const w=document.createElement('a'); w.className='window'; w.href=p.url; w.setAttribute('data-nav','');
+  w.innerHTML=`<div class="win-shadow"></div>
+    <div class="win-opening">
+      <div class="win-glass"><div class="pane"></div><div class="pane"></div></div>
+      <div class="win-curtain"></div><div class="win-mullion-v"></div><div class="win-mullion-h"></div>
+      <div class="win-project" style="background-image:${p.img}"></div>
+      <div class="win-caption"><div class="t">${p.t}</div><div class="l">${p.l}</div></div>
+    </div>
+    <div class="win-frame"></div><div class="shutter left"></div><div class="shutter right"></div>`;
+  return w;
+}
+for(let i=0;i<projects.length;i+=2){
+  const col=document.createElement('div'); col.className='win-col';
+  projects.slice(i,i+2).forEach(p=> col.appendChild(makeWindow(p)));
+  track.appendChild(col);
+}
+
+/* ── horizontal scroll + text dissolve ── */
+const section=document.getElementById('facadeScroll');
+const textEl=document.getElementById('facadeText');
+const hint=document.getElementById('scrollHint');
+const cols=[...document.querySelectorAll('.win-col')];
+function isVertical(){ return window.matchMedia('(max-width:900px)').matches; }
+function onScroll(){
+  const rect=section.getBoundingClientRect();
+  const scrollable=section.offsetHeight-window.innerHeight;
+  const progress=Math.min(1,Math.max(0,-rect.top/scrollable));
+
+  if(isVertical()){
+    /* windows start just below the fold (88vh) and scroll up through the viewport */
+    const total=track.scrollHeight + window.innerHeight*0.9;
+    track.style.transform=`translateY(${ -progress*Math.max(0,total) }px)`;
+  } else {
+    /* windows scroll HORIZONTALLY */
+    const maxShift=track.scrollWidth-track.clientWidth+window.innerWidth*0.18;
+    track.style.transform=`translateX(${ -progress*maxShift }px)`;
+  }
+
+  /* Text dissolves over the FIRST part of the scroll (not on load). */
+  const fadeEnd = 0.18;
+  let tOp = 1 - (progress / fadeEnd);
+  tOp = Math.min(1, Math.max(0, tOp));
+  textEl.style.opacity = tOp;
+  textEl.style.filter = `blur(${(1-tOp)*9}px)`;
+  const baseY = isVertical() ? '0' : '-50%';
+  textEl.style.transform = `translateY(${baseY}) scale(${0.985 + tOp*0.015})`;
+  hint.style.opacity = progress>0.02 ? 0 : 0.7;
+}
+let resizeRAF;
+function onResize(){ onScroll(); }
+window.addEventListener('scroll',onScroll,{passive:true});
+window.addEventListener('resize',()=>{ clearTimeout(resizeRAF); resizeRAF=setTimeout(onResize,150); });
+window.addEventListener('load',()=>{ onScroll(); });
+onScroll();
+
+/* ── custom cursor ── */
+const dot=document.getElementById('cursor-dot'), ring=document.getElementById('cursor-ring');
+let rx=0,ry=0,mx=0,my=0;
+function isDarkAt(x,y){
+  const el=document.elementFromPoint(x,y);
+  if(!el) return false;
+  // climb up looking for a black-bg context (the nav bar / its links), but NOT the red topbar
+  let n=el;
+  while(n && n!==document.body){
+    if(n.id==='navTopbar' || n.closest && n.closest('#navTopbar')) return false; // red bar
+    if(n.id==='bottom-nav') return true; // black nav
+    n=n.parentElement;
+  }
+  return false;
+}
+addEventListener('mousemove',e=>{ mx=e.clientX; my=e.clientY; dot.style.left=mx+'px'; dot.style.top=my+'px';
+  document.body.classList.toggle('cur-on-dark', isDarkAt(mx,my));
+});
+(function loop(){ rx+=(mx-rx)*0.18; ry+=(my-ry)*0.18; ring.style.left=rx+'px'; ring.style.top=ry+'px'; requestAnimationFrame(loop); })();
+document.querySelectorAll('a,[data-nav]').forEach(el=>{
+  el.addEventListener('mouseenter',()=>document.body.classList.add('cur-hover'));
+  el.addEventListener('mouseleave',()=>document.body.classList.remove('cur-hover'));
+});
+
+/* ── bottom nav: click to open, red top bar closes ── */
+const navEl=document.getElementById('bottom-nav');
+const barRow=navEl.querySelector('.bar-row');
+const topbarEl=document.getElementById('navTopbar');
+barRow.addEventListener('click',(e)=>{
+  /* collapsed bar acts as one big "open" button; clicking words opens too */
+  if(!navEl.classList.contains('open')){ e.preventDefault(); e.stopPropagation(); navEl.classList.add('open'); }
+});
+topbarEl.addEventListener('click',(e)=>{
+  /* opened: top logo closes the nav back to the bar (does NOT navigate) */
+  e.preventDefault(); e.stopPropagation();
+  navEl.classList.remove('open');
+});
+
+/* ── loader dismiss ── */
+window.addEventListener('load',()=>{ setTimeout(()=>{ const l=document.getElementById('loader');
+  l.style.transition='opacity .6s ease, transform .6s ease'; l.style.opacity='0'; l.style.transform='translateY(-20px)';
+  setTimeout(()=>l.style.display='none',650); },2300); });
+</script>
+</body>
+</html>
