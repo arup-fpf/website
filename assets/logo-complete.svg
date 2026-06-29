@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1834.76 497.17">
+  <defs>
+    <style>
+      .cls-1 {
+        font-family: Montserrat-Light, Montserrat;
+        font-size: 94px;
+        font-variation-settings: 'wght' 300;
+        font-weight: 300;
+      }
+
+      .cls-2 {
+        letter-spacing: 0em;
+      }
+
+      .cls-3 {
+        font-family: Montserrat-SemiBold, Montserrat;
+        font-size: 150px;
+        font-variation-settings: 'wght' 600;
+        font-weight: 600;
+      }
+
+      .cls-4 {
+        stroke-width: 1.08px;
+      }
+
+      .cls-4, .cls-5, .cls-6, .cls-7 {
+        fill: none;
+        stroke: #000;
+        stroke-miterlimit: 10;
+      }
+
+      .cls-8 {
+        letter-spacing: 0em;
+      }
+
+      .cls-9 {
+        letter-spacing: 0em;
+      }
+
+      .cls-5 {
+        stroke-width: 2px;
+      }
+
+      .cls-6 {
+        stroke-width: 7.56px;
+      }
+
+      .cls-7 {
+        stroke-width: 4.32px;
+      }
+
+      .cls-10 {
+        letter-spacing: -.01em;
+      }
+
+      .cls-11 {
+        letter-spacing: -.02em;
+      }
+
+      .cls-12 {
+        letter-spacing: -.01em;
+      }
+
+      .cls-13 {
+        letter-spacing: -.01em;
+      }
+
+      .cls-14 {
+        letter-spacing: -.01em;
+      }
+
+      .cls-15 {
+        letter-spacing: 0em;
+      }
+
+      .cls-16 {
+        letter-spacing: 0em;
+      }
+
+      .cls-17 {
+        letter-spacing: 0em;
+      }
+
+      .cls-18 {
+        letter-spacing: 0em;
+      }
+    </style>
+  </defs>
+  <g>
+    <g>
+      <rect class="cls-4" x=".54" y="154.98" width="216.28" height="216.28"/>
+      <rect class="cls-4" x="86.96" y="68.56" width="216.28" height="216.28"/>
+      <rect class="cls-4" x="57.89" y="212.33" width="216.28" height="216.28"/>
+      <rect class="cls-4" x="144.31" y="125.91" width="216.28" height="216.28"/>
+    </g>
+    <rect class="cls-7" x="144.31" y="154.98" width="72.52" height="187.22"/>
+    <rect class="cls-7" x="86.96" y="212.33" width="187.22" height="72.52"/>
+    <polyline class="cls-6" points="116.03 68.56 86.96 68.56 86.96 212.33 57.89 212.33"/>
+    <polyline class="cls-6" points="245.11 428.61 274.18 428.61 274.18 284.84 303.24 284.84"/>
+  </g>
+  <line class="cls-5" x1="466" x2="466" y2="497.17"/>
+  <g>
+    <text class="cls-3" transform="translate(560.23 246.09)"><tspan class="cls-10" x="0" y="0">F</tspan><tspan class="cls-9" x="93.3" y="0">o</tspan><tspan class="cls-15" x="190.05" y="0">r</tspan><tspan x="252.3" y="0">m + </tspan><tspan class="cls-10" x="581.54" y="0">F</tspan><tspan x="674.84" y="0">u</tspan><tspan class="cls-2" x="776.99" y="0">n</tspan><tspan class="cls-18" x="879.89" y="0">c</tspan><tspan x="968.09" y="0">tion</tspan></text>
+    <text class="cls-1" transform="translate(560.23 354.23)"><tspan x="0" y="0">A</tspan><tspan class="cls-14" x="66.27" y="0">r</tspan><tspan class="cls-16" x="101.99" y="0">c</tspan><tspan x="153.31" y="0">h</tspan><tspan class="cls-12" x="216.57" y="0">i</tspan><tspan class="cls-11" x="239.89" y="0">t</tspan><tspan x="275.51" y="0">e</tspan><tspan class="cls-17" x="331.63" y="0">c</tspan><tspan x="384.36" y="0">tu</tspan><tspan class="cls-13" x="484.66" y="0">r</tspan><tspan class="cls-8" x="520.38" y="0">e Design Studio</tspan></text>
+  </g>
+</svg>
